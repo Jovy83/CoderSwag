@@ -11,25 +11,34 @@ import com.digigames_interactive.coderswag.Model.Category
 import com.digigames_interactive.coderswag.R
 import kotlinx.android.synthetic.main.category_list_item.view.*
 
-class CategoryAdapter(context: Context, categories: List<Category>) : BaseAdapter() {
-
-    val context = context
-    val categories = categories
+class CategoryAdapter(val context: Context, val categories: List<Category>) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         // similar to cellForRow (indexPath) from iOS
         val categoryView: View
-        categoryView = LayoutInflater.from(context).inflate(R.layout.category_list_item, null)
-        val categoryImage : ImageView = categoryView.categoryImage
-        val categoryName : TextView = categoryView.categoryName
+        val holder: ViewHolder
+
+        if (convertView == null) {
+            // means this is the very first time the views are being presented
+            categoryView = LayoutInflater.from(context).inflate(R.layout.category_list_item, null)
+            holder = ViewHolder()
+            holder.categoryImage = categoryView.categoryImage
+            holder.categoryName = categoryView.categoryName
+            println("I exist for the first time")
+            categoryView.tag = holder
+        } else {
+            holder = convertView.tag as ViewHolder
+            categoryView = convertView
+            println("Go green, recycle!")
+        }
 
         val category = categories[position]
 
+        // takes in a string, resource type, and the package name
         val resourceId = context.resources.getIdentifier(category.image, "drawable", context.packageName)
-        categoryImage.setImageResource(resourceId)
-        println(resourceId)
+        holder.categoryImage?.setImageResource(resourceId)
+        holder.categoryName?.text = category.title
 
-        categoryName.text = category.title
         return categoryView
     }
 
@@ -48,5 +57,8 @@ class CategoryAdapter(context: Context, categories: List<Category>) : BaseAdapte
         return categories.count()
     }
 
-
+    private class ViewHolder {
+        var categoryImage: ImageView? = null
+        var categoryName: TextView? = null
+    }
 }
